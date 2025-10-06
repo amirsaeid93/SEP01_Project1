@@ -1,31 +1,37 @@
 version: '3.8'
 
+# Define a network for our services to share
+networks:
+  app-network:
+
 services:
   app:
-    # Build the application image from the Dockerfile in the current directory
     build: .
-    # Set the image name
     image: saeid1993/sep01-project
-    # Pass the DISPLAY environment variable for Xming
     environment:
       - DISPLAY=host.docker.internal:0.0
     # Tell the app that the database is located at the hostname 'database'
-    # This is where the -Ddb.host=database instruction would go, but we do it here.
     command: [ "java", "-Ddb.host=database", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
-    # Make this service depend on the 'database' service
+    # Make this service depend on the 'database' service being healthy
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+    # Connect this service to our shared network
+    networks:
+      - app-network
 
   database:
-    # Use the official MariaDB image
     image: mariadb:10.6
-    # Restart the container if it stops
     restart: always
-    # Set the required environment variables for MariaDB
-    # These MUST match the credentials your application expects.
     environment:
       - MARIADB_ROOT_PASSWORD=saeidt
       - MARIADB_DATABASE=studyplanner
-    # You can optionally expose the port to connect with an external tool like DBeaver
-    # ports:
-    #   - "3306:3306"
+    # Add a health check to let the 'app' service know when the database is ready
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-psaeidt"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Connect this service to our shared network
+    networks:
+      - app-network
