@@ -5,10 +5,9 @@ Xvfb :99 -screen 0 1280x1024x24 &
 # Set the DISPLAY environment variable to point to the virtual screen
 export DISPLAY=:99
 
-# Start the VNC server, allowing connections from anywhere without a password
+# Start the VNC server
 x11vnc -display :99 -nopw -forever &
 
-# Run the Java application using a classpath AND the module path.
-# --module-path libs: Tells Java to look for the JavaFX modules inside the libs/ folder.
-# -cp "app.jar:libs/*": Tells Java to find our application code and all other libraries.
-java --module-path libs --add-modules javafx.controls,javafx.fxml -cp "app.jar:libs/*" application.Main
+# Run the Java application
+# -Dprism.order=sw tells JavaFX to use the software rendering pipeline, which is required in a headless environment.
+java -Dprism.order=sw --module-path libs --add-modules javafx.controls,javafx.fxml -cp "app.jar:libs/*" application.Main
