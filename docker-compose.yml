@@ -1,37 +1,20 @@
 version: '3.8'
 
-# Define a network for our services to share
-networks:
-  app-network:
-
 services:
   app:
     build: .
     image: saeid1993/sep01-project
     environment:
       - DISPLAY=host.docker.internal:0.0
-    # Tell the app that the database is located at the hostname 'database'
-    command: [ "java", "-Ddb.host=database", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
-    # Make this service depend on the 'database' service being healthy
-    depends_on:
-      database:
-        condition: service_healthy
-    # Connect this service to our shared network
-    networks:
-      - app-network
+    # The command now points to the special 'host.docker.internal' DNS name
+    command: [ "java", "-Ddb.host=host.docker.internal", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
 
   database:
     image: mariadb:10.6
     restart: always
     environment:
-      - MARIADB_ROOT_PASSWORD=saeidt
-      - MARIADB_DATABASE=studyplanner
-    # Add a health check to let the 'app' service know when the database is ready
-    healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-psaeidt"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    # Connect this service to our shared network
-    networks:
-      - app-network
+      MARIADB_ROOT_PASSWORD: saeidt
+      MARIADB_DATABASE: studyplanner
+    # Expose the database port to the host machine
+    ports:
+      - "3306:3306"

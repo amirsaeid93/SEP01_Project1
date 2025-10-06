@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  pinger:
+    image: alpine:latest
+    # This command will run, try to ping the 'target' service 4 times, and then exit.
+    command: ["ping", "-c", "4", "target"]
+
+  target:
+    image: alpine:latest
+    # This service just runs forever so the 'pinger' has something to ping.
+    command: ["sleep", "infinity"]
