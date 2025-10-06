@@ -1,15 +1,14 @@
-# Use Ubuntu base for better graphics support
-FROM ubuntu:22.04
+# Use OpenJDK slim base image for smaller size
+FROM openjdk:17-slim
 
-# Set environment variables
+# Set environment variables to allow apt-get to run without user interaction.
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Set the working directory.
 WORKDIR /app
 
-# Install Java and graphics libraries
+# Install required graphics, GUI libraries, and MariaDB
 RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
     libx11-6 \
     libxext6 \
     libxrender1 \
@@ -20,6 +19,9 @@ RUN apt-get update && apt-get install -y \
     mesa-utils \
     libgl1-mesa-glx \
     libglu1-mesa \
+    libgl1-mesa-dri \
+    mariadb-server \
+    mariadb-client \
     wget \
     unzip \
     && rm -rf /var/lib/apt/lists/*
@@ -34,8 +36,31 @@ RUN mkdir -p /javafx-sdk \
 # Copy the application JAR
 COPY target/notebook-1.0-SNAPSHOT.jar app.jar
 
+# Copy database initialization script
+COPY init-database.sql /docker-entrypoint-initdb.d/
+
 # Set X11 display for GUI applications
 ENV DISPLAY=host.docker.internal:0.0
 
-# Run JavaFX app with software rendering
-CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-Dprism.order=sw", "-jar", "app.jar"]
+# Database environment variables
+ENV MYSQL_ROOT_PASSWORD=root
+ENV MYSQL_DATABASE=notebook
+ENV MYSQL_USER=appuser
+ENV MYSQL_PASSWORD=password
+
+# Expose MySQL port
+EXPOSE 3306
+
+# Initialize MariaDB and set up the database
+RUN service mysql start && \
+    mysql -e "CREATE DATABASE IF NOT EXISTS notebook;" && \
+    mysql -e "CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY 'password';" && \
+    mysql -e "GRANT ALL PRIVILEGES ON notebook.* TO 'appuser'@'localhost';" && \
+    mysql -e "FLUSH PRIVILEGES;" && \
+    service mysql stop
+
+# Force JavaFX to use software rendering instead of hardware acceleration
+ENV JAVA_OPTS="-Dprism.order=sw -Dprism.verbose=true"
+
+# Start MariaDB and then run the Java application
+CMD sh -c 'service mysql start && java --module-path /javafx-sdk/lib --add-modules javafx.controls,javafx.fxml -Dprism.order=sw -jar app.jar'
