@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Set the working directory.
 WORKDIR /app
 
-# Install required graphics, GUI libraries, and MariaDB
+# Install required graphics and GUI libraries with OpenGL support
 RUN apt-get update && apt-get install -y \
     libx11-6 \
     libxext6 \
@@ -20,8 +20,6 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglu1-mesa \
     libgl1-mesa-dri \
-    mariadb-server \
-    mariadb-client \
     wget \
     unzip \
     && rm -rf /var/lib/apt/lists/*
@@ -36,31 +34,11 @@ RUN mkdir -p /javafx-sdk \
 # Copy the application JAR
 COPY target/notebook-1.0-SNAPSHOT.jar app.jar
 
-# Copy database initialization script
-COPY init-database.sql /docker-entrypoint-initdb.d/
-
 # Set X11 display for GUI applications
 ENV DISPLAY=host.docker.internal:0.0
-
-# Database environment variables
-ENV MYSQL_ROOT_PASSWORD=root
-ENV MYSQL_DATABASE=studyplanner
-ENV MYSQL_USER=appuser
-ENV MYSQL_PASSWORD=password
-
-# Expose MySQL port
-EXPOSE 3306
-
-# Initialize MariaDB and set up the database
-RUN service mysql start && \
-    mysql -e "CREATE DATABASE IF NOT EXISTS studyplanner;" && \
-    mysql -e "CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY 'password';" && \
-    mysql -e "GRANT ALL PRIVILEGES ON studyplanner.* TO 'appuser'@'localhost';" && \
-    mysql -e "FLUSH PRIVILEGES;" && \
-    service mysql stop
 
 # Force JavaFX to use software rendering instead of hardware acceleration
 ENV JAVA_OPTS="-Dprism.order=sw -Dprism.verbose=true"
 
-# Start MariaDB and then run the Java application
-CMD sh -c 'service mysql start && java --module-path /javafx-sdk/lib --add-modules javafx.controls,javafx.fxml -Dprism.order=sw -jar app.jar'
+# Run JavaFX app using the downloaded JavaFX SDK
+CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-Dprism.order=sw", "-jar", "app.jar"]

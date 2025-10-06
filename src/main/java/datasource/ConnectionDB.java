@@ -4,26 +4,24 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnectionDB {
-    // Get the database host from a system property, default to "localhost"
-    private static final String DB_HOST = System.getProperty("db.host", "localhost");
-    private static final String URL = "jdbc:mariadb://" + DB_HOST + ":3306/studyplanner";
-    private static final String USER = "root";
-    private static final String PASSWORD = "saeidt";
+    // Get database configuration from environment variables with defaults
+    private static final String DB_HOST = System.getenv().getOrDefault("DB_HOST", "localhost");
+    private static final String DB_PORT = System.getenv().getOrDefault("DB_PORT", "3306");
+    private static final String DB_NAME = System.getenv().getOrDefault("DB_NAME", "studyplanner");
+    private static final String DB_USER = System.getenv().getOrDefault("DB_USER", "root");
+    private static final String DB_PASSWORD = System.getenv().getOrDefault("DB_PASSWORD", "saeidt");
+
+    private static final String URL = "jdbc:mariadb://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME;
 
     public static Connection obtenerConexion() {
-        // --- TEMPORARY DEBUGGING STEP ---
-        // Return null immediately to prevent crash in Docker environment.
-        // This allows us to verify that the GUI itself can launch.
-        System.out.println("Database connection is temporarily disabled for Docker test.");
-        return null;
-        /*
         try {
             Class.forName("org.mariadb.jdbc.Driver");
-            return DriverManager.getConnection(URL, USER, PASSWORD);
+            System.out.println("Connecting to database: " + DB_HOST + ":" + DB_PORT + "/" + DB_NAME);
+            return DriverManager.getConnection(URL, DB_USER, DB_PASSWORD);
         } catch (ClassNotFoundException | SQLException e) {
+            System.err.println("Database connection failed: " + e.getMessage());
             e.printStackTrace();
             return null;
         }
-        */
     }
 }

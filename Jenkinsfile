@@ -51,13 +51,13 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Docker Images') {
             steps {
                 script {
                     if (isUnix()) {
-                        sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                        sh 'docker-compose build'
                     } else {
-                        bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                        bat 'docker-compose build'
                     }
                 }
             }
