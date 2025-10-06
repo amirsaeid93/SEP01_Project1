@@ -1,25 +1,41 @@
-# Start from a full Ubuntu image to ensure all graphics libraries are present.
-FROM ubuntu:22.04
+# Use OpenJDK slim base image for smaller size
+FROM openjdk:17-slim
 
 # Set environment variables to allow apt-get to run without user interaction.
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update the OS and install OpenJDK 17 and the required GTK/font libraries.
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
-    libgtk-3-0 \
-    fontconfig
-
 # Set the working directory.
 WORKDIR /app
 
-# Copy the application JAR.
+# Install required graphics and GUI libraries
+RUN apt-get update && apt-get install -y \
+    libx11-6 \
+    libxext6 \
+    libxrender1 \
+    libxtst6 \
+    libxi6 \
+    libgtk-3-0 \
+    fontconfig \
+    mesa-utils \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and unzip JavaFX Linux SDK
+RUN mkdir -p /javafx-sdk \
+    && wget -O javafx.zip https://download2.gluonhq.com/openjfx/21.0.2/openjfx-21.0.2_linux-x64_bin-sdk.zip \
+    && unzip javafx.zip -d /javafx-sdk \
+    && mv /javafx-sdk/javafx-sdk-21.0.2/lib /javafx-sdk/lib \
+    && rm -rf /javafx-sdk/javafx-sdk-21.0.2 javafx.zip
+
+# Copy the application JAR
 COPY target/notebook-1.0-SNAPSHOT.jar app.jar
 
-# Copy all the dependency JARs.
+# Copy all the dependency JARs (optional - if you still want to keep local libs)
 COPY target/libs libs/
 
-# This is the command that will be executed when the container starts.
-# It is built directly into the image, eliminating the need for run.sh.
-# NOTE: We have REMOVED the "-Dprism.order=sw" flag to allow JavaFX to use the native X11 toolkit.
-CMD [ "java", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
+# Set X11 display for GUI applications
+ENV DISPLAY=host.docker.internal:0.0
+
+# Run JavaFX app using the downloaded JavaFX SDK
+CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-jar", "app.jar"]
