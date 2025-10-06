@@ -6,8 +6,12 @@ services:
     image: saeid1993/sep01-project
     environment:
       - DISPLAY=host.docker.internal:0.0
-    # The command now points to the special 'host.docker.internal' DNS name
-    command: [ "java", "-Ddb.host=host.docker.internal", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
+    # The command tells the app that the database is at the hostname 'database'
+    command: [ "java", "-Ddb.host=database", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
+    # This simple depends_on ensures the database container is created before the app container.
+    # The new Java code will handle waiting for it to be ready.
+    depends_on:
+      - database
 
   database:
     image: mariadb:10.6
@@ -15,6 +19,3 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: saeidt
       MARIADB_DATABASE: studyplanner
-    # Expose the database port to the host machine
-    ports:
-      - "3306:3306"
