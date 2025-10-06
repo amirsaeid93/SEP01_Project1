@@ -31,14 +31,22 @@ RUN mkdir -p /javafx-sdk \
     && mv /javafx-sdk/javafx-sdk-21.0.2/lib /javafx-sdk/lib \
     && rm -rf /javafx-sdk/javafx-sdk-21.0.2 javafx.zip
 
-# Copy the application JAR
+# Copy the application JAR and all dependencies
 COPY target/notebook-1.0-SNAPSHOT.jar app.jar
+COPY target/libs/ libs/
 
 # Set X11 display for GUI applications
 ENV DISPLAY=host.docker.internal:0.0
 
+# Database environment variables
+ENV DB_HOST=database
+ENV DB_PORT=3306
+ENV DB_NAME=studyplanner
+ENV DB_USER=root
+ENV DB_PASSWORD=saeidt
+
 # Force JavaFX to use software rendering instead of hardware acceleration
 ENV JAVA_OPTS="-Dprism.order=sw -Dprism.verbose=true"
 
-# Run JavaFX app by explicitly specifying the main class
-CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-Dprism.order=sw", "-cp", "app.jar", "application.Main"]
+# Run JavaFX app with all dependencies in classpath
+CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-Dprism.order=sw", "-cp", "app.jar:libs/*", "application.Main"]
