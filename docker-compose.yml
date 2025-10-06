@@ -19,12 +19,12 @@ services:
       - app-network
 
   database:
-    image: mariadb:10.11  # Use specific version instead of latest
+    image: mariadb:10.11
     environment:
       MYSQL_ROOT_PASSWORD: saeidt
       MYSQL_DATABASE: studyplanner
     ports:
-      - "3307:3306"  # Changed port to avoid conflicts
+      - "3307:3306"  # Map host port 3307 to container port 3306
     volumes:
       - db_data:/var/lib/mysql
       - ./init-database.sql:/docker-entrypoint-initdb.d/init.sql
