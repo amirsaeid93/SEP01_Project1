@@ -1,69 +1,86 @@
 pipeline {
     agent any
+    tools{
+        maven 'MAVEN_HOME'
+
+    }
 
     environment {
-        DOCKER_IMAGE_NAME = "saeid1993/sep01-project"
-        DOCKER_CREDENTIALS_ID = "Docker_Hub"
+        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
+        DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
+        DOCKER_IMAGE = 'saeid1993/sep01-project'
+        DOCKER_TAG = 'latest'
     }
 
     stages {
-
-        stage('Build') {
-            tools {
-                maven 'MAVEN_HOME'
-            }
+        stage('Setup Maven') {
             steps {
-                bat "mvn clean package -DskipTests"
+                script {
+                    def mvnHome = tool name: 'MAVEN_HOME', type: 'maven'
+                    env.PATH = "${mvnHome}/bin:${env.PATH}"
+                }
             }
         }
 
+        stage('Checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/amirsaeid93/SEP01_Project1.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'mvn clean package -DskipTests'
+                    } else {
+                        bat 'mvn clean package -DskipTests'
+                    }
+                }
+            }
+        }
 
         stage('Test') {
-            tools {
-                maven 'MAVEN_HOME'
-            }
             steps {
-
-                bat "mvn test"
+                script {
+                    if (isUnix()) {
+                        sh 'mvn test'
+                    } else {
+                        bat 'mvn test'
+                    }
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    echo "Building Docker image: ${DOCKER_IMAGE_NAME}"
-
-                    docker.build(DOCKER_IMAGE_NAME)
+                    if (isUnix()) {
+                        sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    } else {
+                        bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    }
                 }
             }
         }
 
-
-        stage('Push Docker Image') {
-            when {
-                branch 'main'
-            }
+        stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    echo "Pushing Docker image to Docker Hub..."
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
-                        docker.image(DOCKER_IMAGE_NAME).push("latest")
+                    docker.withRegistry('https://index.docker.io/v1/', env.DOCKERHUB_CREDENTIALS_ID) {
+                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
                     }
                 }
             }
         }
     }
 
-
-    post {
-        always {
-            junit '**/target/surefire-reports/*.xml'
-
-
-            jacoco execPattern: 'target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
-
-
-            cleanWs()
-        }
+  post {
+    always {
+        junit(testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true)
+        jacoco(execPattern: '**/target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java', inclusionPattern: '**/*.class', exclusionPattern: '')
     }
+}
+
+
 }
