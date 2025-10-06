@@ -1,24 +1,25 @@
-FROM openjdk:17-slim
+# Start from a full Ubuntu image to ensure all graphics libraries are present.
+FROM ubuntu:22.04
 
+# Set environment variables to allow apt-get to run without user interaction.
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update the OS and install OpenJDK 17 and the required GTK/font libraries.
+# We DO NOT need xvfb or x11vnc for this method.
+RUN apt-get update && apt-get install -y \
+    openjdk-17-jdk \
+    libgtk-3-0 \
+    fontconfig
+
+# Set the working directory.
 WORKDIR /app
 
-# Install GUI libraries
-RUN apt-get update && apt-get install -y \
-    libx11-6 libxext6 libxrender1 libxtst6 libxi6 libgtk-3-0 mesa-utils wget unzip \
-    && rm -rf /var/lib/apt/lists/*
+# Copy the application JAR.
+COPY target/notebook-1.0-SNAPSHOT.jar app.jar
 
-# Download and unzip JavaFX Linux SDK
-RUN mkdir -p /javafx-sdk \
-    && wget -O javafx.zip https://download2.gluonhq.com/openjfx/21.0.2/openjfx-21.0.2_linux-x64_bin-sdk.zip \
-    && unzip javafx.zip -d /javafx-sdk \
-    && mv /javafx-sdk/javafx-sdk-21.0.2/lib /javafx-sdk/lib \
-    && rm -rf /javafx-sdk/javafx-sdk-21.0.2 javafx.zip
+# Copy all the dependency JARs.
+COPY target/libs libs/
 
-# Copy your fat JAR
-  COPY target/notebook-1.0-SNAPSHOT.jar app.jar
- #COPY target/*.jar app.jar
-# Set X11 display (Windows host with Xming/X11)
-ENV DISPLAY=host.docker.internal:0.0
-
-# Run JavaFX app
-CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-jar", "app.jar"]
+# This is the command that will be executed when the container starts.
+# It is built directly into the image, eliminating the need for run.sh.
+CMD [ "java", "-Dprism.order=sw", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
