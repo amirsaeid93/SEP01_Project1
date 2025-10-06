@@ -1,7 +1,7 @@
 # Use an official OpenJDK runtime as a parent image
 FROM openjdk:17-jdk-slim
 
-# Install dependencies, including dos2unix to fix line endings
+# Install all necessary dependencies
 RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     libxtst6 \
@@ -9,25 +9,24 @@ RUN apt-get update && apt-get install -y \
     x11vnc \
     dos2unix
 
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the packaged "fat JAR" file into the container
+# Copy the fat JAR and rename it
 COPY target/notebook-1.0-SNAPSHOT.jar app.jar
 
-# Copy the run script into the container
+# Copy the run script
 COPY run.sh .
 
 # --- SCRIPT CLEANUP ---
-# 1. Remove the UTF-8 Byte Order Mark (BOM) if it exists
-# 2. Convert Windows line endings (CRLF) to Unix line endings (LF)
+# This is the most important step. It removes all invisible Windows characters.
 RUN sed -i '1s/^\xEF\xBB\xBF//' run.sh && dos2unix run.sh
 
-# Make the run script executable
+# Make the script executable
 RUN chmod +x run.sh
 
 # Expose the VNC port
 EXPOSE 5900
 
-# The command to run when the container starts
+# Set the default command
 CMD ["./run.sh"]
