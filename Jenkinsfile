@@ -14,7 +14,7 @@ pipeline {
             tools {
                 // Tell Jenkins to use the Maven installation named 'Maven-3.9.6'
                 // This must match the name you configured in Global Tool Configuration
-                maven 'Maven-3.9.6'
+                maven 'MAVEN_HOME'
             }
             steps {
                 // Use 'bat' for Windows. This command cleans, compiles, and packages the code
@@ -27,7 +27,7 @@ pipeline {
         stage('Test') {
             tools {
                 // The Maven tool is also needed for the test stage
-                maven 'Maven-3.9.6'
+                maven 'MAVEN_HOME'
             }
             steps {
                 // Use 'bat' for Windows. This command runs the tests and generates
