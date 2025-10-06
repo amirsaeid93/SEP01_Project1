@@ -11,13 +11,13 @@ RUN apt-get update && apt-get install -y \
     wget \
     unzip
 
-# Download and unzip the JavaFX Linux SDK for Java 17
-# This places the required runtime libraries in /javafx-sdk/lib
+# Download and unzip the JavaFX Linux SDK for Java 17.0.2 from Maven Central
+# This version aligns with the version specified in the pom.xml and is a more reliable download source.
 RUN mkdir -p /javafx-sdk \
-    && wget -O javafx.zip https://download2.gluonhq.com/openjfx/17.0.10/openjfx-17.0.10_linux-x64_bin-sdk.zip \
+    && wget -O javafx.zip https://repo1.maven.org/maven2/org/openjfx/javafx-sdk/17.0.2/javafx-sdk-17.0.2_linux-x64_bin-sdk.zip \
     && unzip javafx.zip -d /javafx-sdk \
-    && mv /javafx-sdk/javafx-sdk-17.0.10/lib /javafx-sdk/lib \
-    && rm -rf /javafx-sdk/javafx-sdk-17.0.10 javafx.zip
+    && mv /javafx-sdk/javafx-sdk-17.0.2/lib /javafx-sdk/lib \
+    && rm -rf /javafx-sdk/javafx-sdk-17.0.2 javafx.zip
 
 # Set the working directory
 WORKDIR /app
