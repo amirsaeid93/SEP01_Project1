@@ -11,7 +11,8 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     stdin_open: true
     tty: true
 
@@ -25,6 +26,12 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./init-database.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   db_data:
