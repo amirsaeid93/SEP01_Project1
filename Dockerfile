@@ -11,10 +11,10 @@ RUN apt-get update && apt-get install -y \
     wget \
     unzip
 
-# Download and unzip the JavaFX Linux SDK for Java 17.0.2 from Maven Central
-# This version aligns with the version specified in the pom.xml and is a more reliable download source.
+# Download and unzip the JavaFX Linux SDK for Java 17.0.2
+# We use a standard User-Agent to avoid a '403 Forbidden' error from the server.
 RUN mkdir -p /javafx-sdk \
-    && wget -O javafx.zip https://repo1.maven.org/maven2/org/openjfx/javafx-sdk/17.0.2/javafx-sdk-17.0.2_linux-x64_bin-sdk.zip \
+    && wget --user-agent="Mozilla" -O javafx.zip https://download2.gluonhq.com/openjfx/17.0.2/openjfx-17.0.2_linux-x64_bin-sdk.zip \
     && unzip javafx.zip -d /javafx-sdk \
     && mv /javafx-sdk/javafx-sdk-17.0.2/lib /javafx-sdk/lib \
     && rm -rf /javafx-sdk/javafx-sdk-17.0.2 javafx.zip
