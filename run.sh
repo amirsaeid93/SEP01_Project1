@@ -9,6 +9,5 @@ export DISPLAY=:99
 x11vnc -display :99 -nopw -forever &
 
 # Run the Java application using a classpath AND the module path.
-# --module-path libs: Tells Java to look for the JavaFX modules inside the libs/ folder.
-# -cp "app.jar:libs/*": Tells Java to find our application code and all other libraries.
-java --module-path libs --add-modules javafx.controls,javafx.fxml -cp "app.jar:libs/*" application.Main
+# -Ddb.host=host.docker.internal tells the app where to find the database.
+java -Ddb.host=host.docker.internal --module-path libs --add-modules javafx.controls,javafx.fxml -cp "app.jar:libs/*" application.Main
