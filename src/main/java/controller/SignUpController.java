@@ -32,35 +32,50 @@ public class SignUpController {
         String password = passwordField.getText();
         String confirmPassword = confirmPasswordField.getText();
 
-
-        if (username.isEmpty() || password.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             showAlert("Error", "Please fill all fields!");
             return;
         }
 
-        User existingUser = userDao.login(username, password);
-        if (existingUser != null) {
-            showAlert("Error", "Username already exists!");
+        if (!password.equals(confirmPassword)) {
+            showAlert("Error", "Passwords do not match!");
             return;
         }
 
-        User newUser = new User(username, password, confirmPassword);
-        userDao.register(newUser);
+        try {
+            // Check if username already exists
+            User existingUser = userDao.login(username, password);
+            if (existingUser != null) {
+                showAlert("Error", "Username already exists!");
+                return;
+            }
 
-        showAlert("Success", "Account created successfully!");
-        handleLoginRedirect(event);
+            // Register new user
+            User newUser = new User(username, password, confirmPassword);
+            userDao.register(newUser);
+
+            showAlert("Success", "Account created successfully!");
+            handleLoginRedirect(event);
+
+        } catch (Exception e) {
+            System.err.println("Signup error: " + e.getMessage());
+            showAlert("Database Error", "Cannot create account at the moment. Please try again later.\n\nError: " + e.getMessage());
+        }
     }
 
     @FXML
     private void handleLoginRedirect(ActionEvent event) throws IOException {
-        Parent loginRoot = FXMLLoader.load(getClass().getResource("/Login.fxml"));
-        Scene loginScene = new Scene(loginRoot);
+        try {
+            Parent loginRoot = FXMLLoader.load(getClass().getResource("/Login.fxml"));
+            Scene loginScene = new Scene(loginRoot);
 
-
-        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-        window.setScene(loginScene);
-        window.show();
+            Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            window.setScene(loginScene);
+            window.show();
+        } catch (Exception e) {
+            System.err.println("Error loading login page: " + e.getMessage());
+            showAlert("Error", "Cannot load login page. Please try again.");
+        }
     }
 
     private void showAlert(String title, String message) {
