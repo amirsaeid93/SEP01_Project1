@@ -5,7 +5,6 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Update the OS and install OpenJDK 17 and the required GTK/font libraries.
-# We DO NOT need xvfb or x11vnc for this method.
 RUN apt-get update && apt-get install -y \
     openjdk-17-jdk \
     libgtk-3-0 \
@@ -22,4 +21,5 @@ COPY target/libs libs/
 
 # This is the command that will be executed when the container starts.
 # It is built directly into the image, eliminating the need for run.sh.
-CMD [ "java", "-Dprism.order=sw", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
+# NOTE: We have REMOVED the "-Dprism.order=sw" flag to allow JavaFX to use the native X11 toolkit.
+CMD [ "java", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
