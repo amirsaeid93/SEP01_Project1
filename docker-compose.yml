@@ -3,43 +3,14 @@ services:
     build: .
     environment:
       - DISPLAY=host.docker.internal:0.0
-      - DB_HOST=database
+      - DB_HOST=host.docker.internal  # Connect to host machine
       - DB_PORT=3306
       - DB_NAME=studyplanner
       - DB_USER=root
       - DB_PASSWORD=saeidt
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-    depends_on:
-      database:
-        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     stdin_open: true
     tty: true
-    networks:
-      - app-network
-
-  database:
-    image: mariadb:10.11
-    environment:
-      MYSQL_ROOT_PASSWORD: saeidt
-      MYSQL_DATABASE: studyplanner
-    ports:
-      - "3307:3306"  # Map host port 3307 to container port 3306
-    volumes:
-      - db_data:/var/lib/mysql
-      - ./init-database.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psaeidt"]
-      start_period: 40s
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    networks:
-      - app-network
-
-volumes:
-  db_data:
-
-networks:
-  app-network:
-    driver: bridge

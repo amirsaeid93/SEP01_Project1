@@ -4,8 +4,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnectionDB {
-    // Get database configuration from environment variables with defaults
-    private static final String DB_HOST = System.getenv().getOrDefault("DB_HOST", "localhost");
+    // Use host.docker.internal to connect to host machine from Docker
+    private static final String DB_HOST = System.getenv().getOrDefault("DB_HOST", "host.docker.internal");
     private static final String DB_PORT = System.getenv().getOrDefault("DB_PORT", "3306");
     private static final String DB_NAME = System.getenv().getOrDefault("DB_NAME", "studyplanner");
     private static final String DB_USER = System.getenv().getOrDefault("DB_USER", "root");
@@ -16,12 +16,12 @@ public class ConnectionDB {
     public static Connection obtenerConexion() {
         try {
             Class.forName("org.mariadb.jdbc.Driver");
-            // Attempt to connect just once.
-            return DriverManager.getConnection(URL, DB_USER, DB_PASSWORD);
+            System.out.println("Attempting to connect to: " + URL);
+            Connection connection = DriverManager.getConnection(URL, DB_USER, DB_PASSWORD);
+            System.out.println("Database connection successful!");
+            return connection;
         } catch (ClassNotFoundException | SQLException e) {
-            // If it fails, print the error and return null immediately.
             System.err.println("Database connection failed: " + e.getMessage());
-            e.printStackTrace();
             return null;
         }
     }
