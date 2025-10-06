@@ -20,7 +20,8 @@ public class ConnectionDB {
             return DriverManager.getConnection(URL, DB_USER, DB_PASSWORD);
         } catch (ClassNotFoundException | SQLException e) {
             System.err.println("Database connection failed: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Application will continue without database functionality");
+            // Return null but don't crash the application
             return null;
         }
     }
