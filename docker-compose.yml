@@ -1,21 +1,45 @@
-version: '3.8'
-
 services:
   app:
     build: .
-    image: saeid1993/sep01-project
     environment:
       - DISPLAY=host.docker.internal:0.0
-    # The command tells the app that the database is at the hostname 'database'
-    command: [ "java", "-Ddb.host=database", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
-    # This simple depends_on ensures the database container is created before the app container.
-    # The new Java code will handle waiting for it to be ready.
+      - DB_HOST=database
+      - DB_PORT=3306
+      - DB_NAME=studyplanner
+      - DB_USER=root
+      - DB_PASSWORD=saeidt
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
 
   database:
-    image: mariadb:10.6
-    restart: always
+    image: mariadb:10.11  # Use specific version instead of latest
     environment:
-      MARIADB_ROOT_PASSWORD: saeidt
-      MARIADB_DATABASE: studyplanner
+      MYSQL_ROOT_PASSWORD: saeidt
+      MYSQL_DATABASE: studyplanner
+    ports:
+      - "3307:3306"  # Changed port to avoid conflicts
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init-database.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psaeidt"]
+      start_period: 40s
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge
