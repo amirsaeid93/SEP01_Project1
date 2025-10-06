@@ -35,4 +35,4 @@ COPY target/notebook-1.0-SNAPSHOT.jar app.jar
 ENV DISPLAY=host.docker.internal:0.0
 
 # Run JavaFX app using the downloaded JavaFX SDK and specify the main class
-CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-jar", "app.jar"]
+CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar", "application.Main"]
