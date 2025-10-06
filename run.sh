@@ -8,5 +8,6 @@ export DISPLAY=:99
 # Start the VNC server, allowing connections from anywhere without a password
 x11vnc -display :99 -nopw -forever &
 
-# Run the Java application, telling it where to find the JavaFX modules
-java --module-path /javafx-sdk/lib --add-modules javafx.controls,javafx.fxml -jar app.jar
+# Run the Java application using a classpath
+# This tells Java to look for classes in our app.jar and in all the JARs inside the libs/ folder.
+java -cp "app.jar:libs/*" application.Main
