@@ -31,11 +31,8 @@ RUN mkdir -p /javafx-sdk \
 # Copy the application JAR
 COPY target/notebook-1.0-SNAPSHOT.jar app.jar
 
-# Copy all the dependency JARs (optional - if you still want to keep local libs)
-COPY target/libs libs/
-
 # Set X11 display for GUI applications
 ENV DISPLAY=host.docker.internal:0.0
 
-# Run JavaFX app using the downloaded JavaFX SDK
-CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar", "your.package.Main"]
+# Run JavaFX app using the downloaded JavaFX SDK and specify the main class
+CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-jar", "app.jar"]
