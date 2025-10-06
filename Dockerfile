@@ -1,14 +1,15 @@
-# Use OpenJDK slim base image for smaller size
-FROM openjdk:17-slim
+# Use Ubuntu base for better graphics support
+FROM ubuntu:22.04
 
-# Set environment variables to allow apt-get to run without user interaction.
+# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Set the working directory.
 WORKDIR /app
 
-# Install required graphics and GUI libraries
+# Install Java and graphics libraries
 RUN apt-get update && apt-get install -y \
+    openjdk-17-jdk \
     libx11-6 \
     libxext6 \
     libxrender1 \
@@ -17,6 +18,8 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     fontconfig \
     mesa-utils \
+    libgl1-mesa-glx \
+    libglu1-mesa \
     wget \
     unzip \
     && rm -rf /var/lib/apt/lists/*
@@ -34,5 +37,5 @@ COPY target/notebook-1.0-SNAPSHOT.jar app.jar
 # Set X11 display for GUI applications
 ENV DISPLAY=host.docker.internal:0.0
 
-# Run JavaFX app using the downloaded JavaFX SDK and specify the main class
-CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar", "application.Main"]
+# Run JavaFX app with software rendering
+CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-Dprism.order=sw", "-jar", "app.jar"]
