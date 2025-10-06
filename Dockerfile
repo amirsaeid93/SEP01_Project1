@@ -40,5 +40,5 @@ ENV DISPLAY=host.docker.internal:0.0
 # Force JavaFX to use software rendering instead of hardware acceleration
 ENV JAVA_OPTS="-Dprism.order=sw -Dprism.verbose=true"
 
-# Run JavaFX app using the downloaded JavaFX SDK
-CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-Dprism.order=sw", "-jar", "app.jar"]
+# Run JavaFX app by explicitly specifying the main class
+CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-Dprism.order=sw", "-cp", "app.jar", "application.Main"]
