@@ -1,37 +1,31 @@
+version: '3.8'
+
 services:
   app:
+    # Build the application image from the Dockerfile in the current directory
     build: .
+    # Set the image name
+    image: saeid1993/sep01-project
+    # Pass the DISPLAY environment variable for Xming
     environment:
       - DISPLAY=host.docker.internal:0.0
-      - DB_HOST=database
-      - DB_PORT=3306
-      - DB_NAME=studyplanner
-      - DB_USER=root
-      - DB_PASSWORD=saeidt
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
+    # Tell the app that the database is located at the hostname 'database'
+    # This is where the -Ddb.host=database instruction would go, but we do it here.
+    command: [ "java", "-Ddb.host=database", "--module-path", "libs", "--add-modules", "javafx.controls,javafx.fxml", "-cp", "app.jar:libs/*", "application.Main" ]
+    # Make this service depend on the 'database' service
     depends_on:
-      database:
-        condition: service_healthy
-    stdin_open: true
-    tty: true
+      - database
 
   database:
-    image: mariadb:latest
+    # Use the official MariaDB image
+    image: mariadb:10.6
+    # Restart the container if it stops
+    restart: always
+    # Set the required environment variables for MariaDB
+    # These MUST match the credentials your application expects.
     environment:
-      MYSQL_ROOT_PASSWORD: saeidt
-      MYSQL_DATABASE: studyplanner
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-      - ./init-database.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      start_period: 30s
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-volumes:
-  db_data:
+      - MARIADB_ROOT_PASSWORD=saeidt
+      - MARIADB_DATABASE=studyplanner
+    # You can optionally expose the port to connect with an external tool like DBeaver
+    # ports:
+    #   - "3306:3306"
