@@ -44,7 +44,7 @@ ENV DISPLAY=host.docker.internal:0.0
 
 # Database environment variables
 ENV MYSQL_ROOT_PASSWORD=root
-ENV MYSQL_DATABASE=notebook
+ENV MYSQL_DATABASE=studyplanner
 ENV MYSQL_USER=appuser
 ENV MYSQL_PASSWORD=password
 
@@ -53,9 +53,9 @@ EXPOSE 3306
 
 # Initialize MariaDB and set up the database
 RUN service mysql start && \
-    mysql -e "CREATE DATABASE IF NOT EXISTS notebook;" && \
+    mysql -e "CREATE DATABASE IF NOT EXISTS studyplanner;" && \
     mysql -e "CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY 'password';" && \
-    mysql -e "GRANT ALL PRIVILEGES ON notebook.* TO 'appuser'@'localhost';" && \
+    mysql -e "GRANT ALL PRIVILEGES ON studyplanner.* TO 'appuser'@'localhost';" && \
     mysql -e "FLUSH PRIVILEGES;" && \
     service mysql stop
 
