@@ -153,40 +153,4 @@ class TaskDaoTest {
 
     }
 
-//    @Test
-//    void testGetTasksByDateRange() {
-//        Task task1 = new Task();
-//        task1.setUserId(1);
-//        task1.setTitle("Task 1");
-//        task1.setDescription("Desc 1");
-//        task1.setStatus("TODO");
-//        task1.setDueDate(LocalDateTime.of(2024, 1, 15, 10, 0));
-//        taskDao.persist(task1);
-//
-//        Task task2 = new Task();
-//        task2.setUserId(2);
-//        task2.setTitle("Task 2");
-//        task2.setDescription("Desc 2");
-//        task2.setStatus("DONE");
-//        task2.setDueDate(LocalDateTime.of(2024, 2, 20, 12, 0));
-//        taskDao.persist(task2);
-//
-//        Task task3 = new Task();
-//        task3.setUserId(3);
-//        task3.setTitle("Task 3");
-//        task3.setDescription("Desc 3");
-//        task3.setStatus("IN_PROGRESS");
-//        task3.setDueDate(LocalDateTime.of(2024, 3, 25, 14, 0));
-//        taskDao.persist(task3);
-//
-//        LocalDateTime start = LocalDateTime.of(2024, 1, 1, 0, 0);
-//        LocalDateTime end = LocalDateTime.of(2024, 2, 28, 23, 59);
-//
-//        List<Task> tasksInRange = taskDao.getTasksByDateRange(3, task3.getDueDate().toLocalDate(), task3.endOfDay().toLocalDate());
-//        assertNotNull(tasksInRange);
-//        assertEquals(1, tasksInRange.size());
-//        assertEquals("Task 3", tasksInRange.get(0).getTitle());
-//    }
-
-
 }
