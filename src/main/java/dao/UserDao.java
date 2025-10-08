@@ -41,7 +41,6 @@ public class UserDao {
         String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
 
         try (Connection conn = ConnectionDB.obtenerConexion()) {
-            // Check if connection is null
             if (conn == null) {
                 System.err.println("Database connection failed - cannot perform login");
                 return null;

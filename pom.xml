@@ -27,7 +27,7 @@
                 </configuration>
             </plugin>
 
-            <!-- JavaFX Maven Plugin for running locally -->
+
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -91,7 +91,7 @@
     </build>
 
     <dependencies>
-        <!-- JavaFX dependencies -->
+
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -103,7 +103,7 @@
             <version>${javafx.version}</version>
         </dependency>
 
-        <!-- Database and ORM -->
+
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
@@ -126,14 +126,14 @@
             </exclusions>
         </dependency>
 
-        <!-- Logging framework -->
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.4.6</version>
         </dependency>
 
-        <!-- Test Dependencies -->
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
