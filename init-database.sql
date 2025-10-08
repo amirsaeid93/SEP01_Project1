@@ -1,5 +1,6 @@
 CREATE DATABASE IF NOT EXISTS studyplanner;
 
+
 USE studyplanner;
 
 

@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 public class ConnectionDB {
     public static Connection obtenerConexion() {
-        // TEMPORARY: Hardcode connection to host machine to get the app running with the docker image.
+        // TEMPORARY: Hardcoded connection to host machine to get the app running with the docker image.
         String url = "jdbc:mariadb://host.docker.internal:3306/studyplanner";
         String user = "root";
         String password = "saeidt";
